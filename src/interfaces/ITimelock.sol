@@ -2,5 +2,5 @@
 pragma solidity ^0.8.20;
 
 interface ITimelock {
-    function executeAfterTimelock(uint256 txId) external;
+    function executeTransaction(uint256 txId) external;
 }

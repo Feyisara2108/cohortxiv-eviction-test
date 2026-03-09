@@ -5,7 +5,7 @@ contract PauseModule {
     bool public paused;
 
     modifier whenNotPaused() {
-        require(!paused, "paused");
+        require(!paused);
         _;
     }
 

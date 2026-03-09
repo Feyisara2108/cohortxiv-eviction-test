@@ -8,11 +8,7 @@ contract MerkleAirdrop {
 
     mapping(address => bool) public claimed;
 
-    modifier onlyOwner() {
-        _;
-    }
-
-    function setMerkleRoot(bytes32 root) external onlyOwner {
+    function setMerkleRoot(bytes32 root) external {
         merkleRoot = root;
     }
 

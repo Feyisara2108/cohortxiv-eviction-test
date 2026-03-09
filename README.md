@@ -1,66 +1,99 @@
-## Foundry
+# HardenedEvictionVault
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Secure, modular smart contract for managing eviction deposits with multi-signature governance, timelock protection, and emergency controls.
 
-Foundry consists of:
+---
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### Security Features
 
-## Documentation
+| Feature | Protection |
+|---|---|
+| Multi-Sig Owners | Sensitive actions require threshold of owners to confirm |
+| Timelock Delay | Admin transactions execute only after a mandatory delay |
+| Emergency Pause | Owners can halt withdrawals via `PauseModule` |
+| Safe Transfers | Uses `.call{value: }()` — no 2300 gas limit |
+| Reentrancy Guard | Inherited guards prevent reentrancy attacks |
+| No `tx.origin` | Uses `msg.sender` exclusively (phishing-resistant) |
 
-https://book.getfoundry.sh/
+---
 
-## Usage
+### Installation
+```bash
+git clone <repo> && cd eviction-vault
 
-### Build
+forge install OpenZeppelin/openzeppelin-contracts --no-commit
+forge install foundry-rs/forge-std --no-commit
 
-```shell
-$ forge build
+forge build
 ```
 
-### Test
-
-```shell
-$ forge test
+### Deployment
+```bash
+forge script script/DeployVault.s.sol:DeployVault \
+  --rpc-url $RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast
 ```
 
-### Format
+**Constructor params:**
+- `owners` — array of authorized multi-sig addresses
+- `threshold` — minimum confirmations required (e.g. `2` for 2-of-3)
 
-```shell
-$ forge fmt
+---
+
+### Key Functions
+
+| Function | Access | Description |
+|---|---|---|
+| `deposit()` | Public | Deposit ETH |
+| `withdraw(uint256)` | Public | Withdraw balance (pausable) |
+| `pause() / unpause()` | Owner | Emergency control |
+| `submitTransaction()` | Owner | Propose admin action |
+| `confirmTransaction()` | Owner | Approve proposed action |
+| `executeTransaction()` | Public | Execute after delay + confirmations |
+
+---
+
+### Testing
+```bash
+forge test -vvv
+forge test --gas-report
+forge coverage
 ```
 
-### Gas Snapshots
+---
 
-```shell
-$ forge snapshot
+### Project Structure
 ```
-
-### Anvil
-
-```shell
-$ anvil
+src/
+├── HardenedEvictionVault.sol
+├── modules/
+│   ├── TimelockExecutor.sol
+│   ├── MerkleAirdrop.sol
+│   ├── PauseModule.sol
+│   └── SignatureUtils.sol
+└── interfaces/
+    └── IVault.sol
 ```
+### Test suites
+![vault test](https://github.com/user-attachments/assets/7d0e503e-1ac8-4d80-94bc-989e0cf528b6)
 
-### Deploy
+### Deployment (on anvil)
+![vaultscript](https://github.com/user-attachments/assets/700d3ac7-ce85-4fbc-926f-efb47a927126)
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
 
-### Cast
 
-```shell
-$ cast <subcommand>
-```
+---
 
-### Help
+### Notes
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+- Set `threshold ≥ 2` in production
+- Recommended timelock delay: 1–48 hours
+- Audit before mainnet deployment
+
+
+
+---
+
+### License
+MIT

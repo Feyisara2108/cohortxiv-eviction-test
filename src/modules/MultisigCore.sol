@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
 import "../interfaces/IMultisig.sol";
 
@@ -46,7 +46,7 @@ contract MultisigCore is IMultisig {
         return txId;
     }
 
-    function confirmTransaction(uint256 txId) public override onlyOwner {
+    function confirmTransaction(uint256 txId) public virtual onlyOwner {
         Transaction storage txn = transactions[txId];
 
         require(!txn.executed);

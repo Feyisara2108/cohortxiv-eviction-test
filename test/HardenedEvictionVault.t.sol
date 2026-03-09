@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
 import "../src/HardenedEvictionVault.sol";
@@ -11,9 +11,10 @@ contract VaultTest is Test {
     address owner2 = address(2);
     address user = address(3);
 
-    function setUp() public {
-        address;
+    address[] public owners;
 
+    function setUp() public {
+        owners = new address[](2);
         owners[0] = owner1;
         owners[1] = owner2;
 
@@ -42,6 +43,7 @@ contract VaultTest is Test {
     }
 
     function testPause() public {
+        vm.prank(owner1);
         vault.pause();
 
         assertTrue(vault.paused());
@@ -57,15 +59,12 @@ contract VaultTest is Test {
 
     function testConfirmTransaction() public {
         vm.prank(owner1);
-
         uint256 txId = vault.submitTransaction(address(1), 0, "");
 
         vm.prank(owner2);
-
         vault.confirmTransaction(txId);
 
-        (,,,, uint256 conf,,) = vault.transactions(txId);
-
-        assertEq(conf, 2);
+        (,,,, uint256 confCount,,) = vault.transactions(txId);
+        assertEq(confCount, 2);
     }
 }
